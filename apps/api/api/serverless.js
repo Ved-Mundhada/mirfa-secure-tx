@@ -61,9 +61,18 @@ export default async function handler(req, res) {
     try {
         const fastify = await buildApp();
         
+        // Get the original URL path (remove /api/serverless prefix if present)
+        let url = req.url || '/';
+        if (url.startsWith('/api/serverless')) {
+            url = url.replace('/api/serverless', '') || '/';
+        }
+        
+        console.log('Original req.url:', req.url);
+        console.log('Processed url:', url);
+        
         const response = await fastify.inject({
             method: req.method,
-            url: req.url,
+            url: url,
             headers: req.headers,
             payload: req.body
         });
