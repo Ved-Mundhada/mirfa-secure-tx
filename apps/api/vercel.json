@@ -1,7 +1,12 @@
 {
   "version": 2,
+  "buildCommand": "cd ../.. && pnpm turbo run build --filter=api...",
+  "installCommand": "pnpm install",
   "rewrites": [
-    { "source": "/(.*)", "destination": "/api/serverless" }
+    {
+      "source": "/(.*)",
+      "destination": "/api/serverless"
+    }
   ],
   "functions": {
     "api/serverless.ts": {
