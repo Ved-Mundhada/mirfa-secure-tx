@@ -13,6 +13,11 @@ const db = new Map<string, any>();
 // 3. master key for encryption/decryption
 const MASTER_KEY = "0000000000000000000000000000000000000000000000000000000000000001";
 
+// Root route for health check
+server.get('/', async (request, reply) => {
+  return { status: "ok", message: "Mirfa Secure Tx API is running" };
+});
+
 
 server.post('/tx/encrypt', async (request, reply) => {
   const body = request.body as any;
