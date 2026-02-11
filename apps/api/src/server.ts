@@ -1,4 +1,5 @@
 import Fastify from 'fastify';
+import { fileURLToPath } from 'node:url';
 import cors from '@fastify/cors';
 import { encryptEnvelope, decryptEnvelope } from '@repo/crypto';
 
@@ -15,21 +16,21 @@ const MASTER_KEY = "000000000000000000000000000000000000000000000000000000000000
 
 server.post('/tx/encrypt', async (request, reply) => {
   const body = request.body as any;
-  
+
   if (!body || !body.payload) {
     return reply.code(400).send({ error: "Missing payload" });
   }
 
   try {
     const encryptedData = encryptEnvelope(body.payload, MASTER_KEY);
-    
+
     const id = `tx_${Date.now()}`;
-    
+
     db.set(id, {
       partyId: body.partyId || 'anon',
       ...encryptedData
     });
-    
+
     return { id };
 
   } catch (err) {
@@ -71,4 +72,11 @@ const start = async () => {
     process.exit(1);
   }
 };
-start();
+
+// ... other imports ...
+
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  start();
+}
+
+export default server;
