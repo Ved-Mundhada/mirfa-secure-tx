@@ -4,10 +4,10 @@ import { encryptEnvelope, decryptEnvelope } from '@repo/crypto';
 
 const app = Fastify({ logger: true });
 
-app.register(cors, { origin: '*' });
+await app.register(cors, { origin: '*' });
 
 const MASTER_KEY = process.env.MASTER_KEY || "0000000000000000000000000000000000000000000000000000000000000001";
-const db = new Map(); // Note: In serverless, this DB resets on every request!
+const db = new Map(); // Note: In serverless, this DB resets on cold starts!
 
 app.get('/', async (req, reply) => {
     return { status: "OK", message: "Mirfa Secure Vault API is running" };
@@ -19,18 +19,48 @@ app.post('/tx/encrypt', async (req, reply) => {
     
     try {
         const envelope = encryptEnvelope(body.payload, MASTER_KEY);
-        // In a real app, save to a DB here. 
-        // For this demo, we just return the envelope so the frontend can display it.
-        return { 
-            id: `tx_${Date.now()}`,
-            ...envelope 
-        };
+        const id = `tx_${Date.now()}`;
+        db.set(id, { partyId: body.partyId || 'anon', ...envelope });
+        return { id, ...envelope };
     } catch (err) {
         return reply.code(500).send({ error: "Encryption failed" });
     }
 });
 
+app.get('/tx/:id', async (req, reply) => {
+    const { id } = req.params;
+    const data = db.get(id);
+    if (!data) return reply.code(404).send({ error: "Transaction not found" });
+    return data;
+});
+
+app.post('/tx/:id/decrypt', async (req, reply) => {
+    const { id } = req.params;
+    const data = db.get(id);
+    if (!data) return reply.code(404).send({ error: "Transaction not found" });
+    
+    try {
+        const decryptedPayload = decryptEnvelope(data, MASTER_KEY);
+        return decryptedPayload;
+    } catch (err) {
+        return reply.code(400).send({ error: "Decryption failed. Data might be tampered." });
+    }
+});
+
+await app.ready();
+
+// Vercel serverless handler  
 export default async function handler(req, res) {
-    await app.ready();
-    app.server.emit('request', req, res);
+    const response = await app.inject({
+        method: req.method,
+        url: req.url,
+        headers: req.headers,
+        payload: req.body
+    });
+    
+    res.status(response.statusCode);
+    for (const [key, value] of Object.entries(response.headers)) {
+        res.setHeader(key, value);
+    }
+    res.send(response.payload);
 }
