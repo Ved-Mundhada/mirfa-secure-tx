@@ -15,12 +15,13 @@ async function runServerTest() {
       body: JSON.stringify(testData)
     });
     
-    const { id } = await encRes.json();
+    const encData = await encRes.json() as { id: string };
+    const { id } = encData;
     console.log(`Received Transaction ID: ${id}`);
 
     console.log("Step 2: Testing /tx/:id (Fetching encrypted blob)...");
     const getRes = await fetch(`${API_URL}/tx/${id}`);
-    const blob = await getRes.json();
+    const blob = await getRes.json() as { payload_ct?: string };
     
     if (blob.payload_ct) {
       console.log("Success: Data is safely encrypted in the database.");
@@ -28,7 +29,7 @@ async function runServerTest() {
 
     console.log("Step 3: Testing /tx/:id/decrypt...");
     const decRes = await fetch(`${API_URL}/tx/${id}/decrypt`, { method: 'POST' });
-    const originalData = await decRes.json();
+    const originalData = await decRes.json() as { message?: string };
 
     if (originalData.message === testData.payload.message) {
       console.log("Step 4: Comparison Success! Original data recovered.");
