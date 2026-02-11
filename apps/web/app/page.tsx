@@ -2,7 +2,8 @@
 import { useState } from "react";
 import axios from "axios";
 
-const API_URL = "http://localhost:3001";
+// Use environment variable for production, fallback to localhost for dev
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
 export default function Home() {
   const [secret, setSecret] = useState('{"amount": 1000, "to": "IronMan"}');
