@@ -24,8 +24,9 @@ export default function Home() {
       });
       setCreatedId(res.data.id);
       setLookupId(res.data.id);
-    } catch {
-      alert("Error: Invalid JSON or Server Down");
+    } catch (err: any) {
+      console.error(err);
+      alert(`Error: ${err.message}\nAPI URL: ${API_URL}`);
     }
     setLoading(false);
   };
@@ -38,8 +39,9 @@ export default function Home() {
       if (!lookupId) return alert("Enter an ID");
       const res = await axios.post(`${API_URL}/tx/${lookupId}/decrypt`);
       setDecryptedData(JSON.stringify(res.data, null, 2));
-    } catch {
-      setDecryptedData("Decryption Failed: Integrity Check Failed or Wrong ID");
+    } catch (err: any) {
+      console.error(err);
+      setDecryptedData(`Error: ${err.message}\nAPI URL: ${API_URL}`);
     }
     setLoading(false);
   };
@@ -90,21 +92,19 @@ export default function Home() {
         <div className="flex md:hidden mb-6 bg-[#1e293b]/50 p-1 rounded-xl border border-slate-700/50">
           <button
             onClick={() => setActiveTab("encrypt")}
-            className={`flex-1 py-3 rounded-lg font-semibold transition ${
-              activeTab === "encrypt"
-                ? "bg-cyan-500 text-white shadow-lg shadow-cyan-500/25"
-                : "text-slate-400 hover:text-white"
-            }`}
+            className={`flex-1 py-3 rounded-lg font-semibold transition ${activeTab === "encrypt"
+              ? "bg-cyan-500 text-white shadow-lg shadow-cyan-500/25"
+              : "text-slate-400 hover:text-white"
+              }`}
           >
             Encrypt
           </button>
           <button
             onClick={() => setActiveTab("decrypt")}
-            className={`flex-1 py-3 rounded-lg font-semibold transition ${
-              activeTab === "decrypt"
-                ? "bg-purple-500 text-white shadow-lg shadow-purple-500/25"
-                : "text-slate-400 hover:text-white"
-            }`}
+            className={`flex-1 py-3 rounded-lg font-semibold transition ${activeTab === "decrypt"
+              ? "bg-purple-500 text-white shadow-lg shadow-purple-500/25"
+              : "text-slate-400 hover:text-white"
+              }`}
           >
             Decrypt
           </button>
@@ -298,17 +298,15 @@ export default function Home() {
               {/* Decrypted Result */}
               {decryptedData && (
                 <div
-                  className={`mt-6 p-4 rounded-xl animate-in fade-in slide-in-from-bottom-2 duration-300 ${
-                    decryptedData.includes("Failed")
-                      ? "bg-red-500/5 border border-red-500/20"
-                      : "bg-purple-500/5 border border-purple-500/20"
-                  }`}
+                  className={`mt-6 p-4 rounded-xl animate-in fade-in slide-in-from-bottom-2 duration-300 ${decryptedData.includes("Failed")
+                    ? "bg-red-500/5 border border-red-500/20"
+                    : "bg-purple-500/5 border border-purple-500/20"
+                    }`}
                 >
                   <div className="flex items-center justify-between mb-2">
                     <span
-                      className={`text-xs font-bold uppercase tracking-wider flex items-center gap-2 ${
-                        decryptedData.includes("Failed") ? "text-red-400" : "text-purple-400"
-                      }`}
+                      className={`text-xs font-bold uppercase tracking-wider flex items-center gap-2 ${decryptedData.includes("Failed") ? "text-red-400" : "text-purple-400"
+                        }`}
                     >
                       {decryptedData.includes("Failed") ? (
                         <>
@@ -339,9 +337,8 @@ export default function Home() {
                     )}
                   </div>
                   <pre
-                    className={`font-mono text-sm break-all whitespace-pre-wrap bg-black/20 p-3 rounded-lg max-h-48 overflow-auto ${
-                      decryptedData.includes("Failed") ? "text-red-300" : "text-white"
-                    }`}
+                    className={`font-mono text-sm break-all whitespace-pre-wrap bg-black/20 p-3 rounded-lg max-h-48 overflow-auto ${decryptedData.includes("Failed") ? "text-red-300" : "text-white"
+                      }`}
                   >
                     {decryptedData}
                   </pre>
