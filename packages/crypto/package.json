@@ -1,9 +1,14 @@
 {
   "name": "@repo/crypto",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
   "version": "0.0.0",
   "private": true,
   "exports": {
-    "./*": "./src/*.tsx"
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
   },
   "scripts": {
     "lint": "eslint . --max-warnings 0",
